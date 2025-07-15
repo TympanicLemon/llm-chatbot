@@ -21,9 +21,13 @@ def main():
     prompt_tokens = content.usage_metadata.prompt_token_count
     response_tokens = content.usage_metadata.candidates_token_count
 
-    print(f"User prompt: : {user_prompt}\n")
-    print(f"Prompt tokens: {prompt_tokens}")
-    print(f"Response tokens: {response_tokens}")
+    if len(sys.argv) > 1:
+       if sys.argv[2] == "--verbose":
+            print(f"User prompt: : {user_prompt}\n")
+            print(f"Prompt tokens: {prompt_tokens}")
+            print(f"Response tokens: {response_tokens}")
+       else:
+           print(text)
 
 if __name__ == "__main__":
     main()
