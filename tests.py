@@ -1,13 +1,16 @@
-from functions.get_files_info import get_files_info
+from functions.get_files_info import get_file_content
 
-print("Result for current directory:")
-print(get_files_info("calculator", "."))
+print("=== Test Case 1: calculator/main.py ===")
+print(get_file_content("calculator", "main.py"))
+print("\n")
 
-print("\nResult for 'pkg' directory:")
-print(get_files_info("calculator", "pkg"))
+print("=== Test Case 2: calculator/pkg/calculator.py ===")
+print(get_file_content("calculator", "pkg/calculator.py"))
+print("\n")
 
-print("\nResult for '/bin' directory:")
-print(get_files_info("calculator", "/bin"))
+print("=== Test Case 3: calculator//bin/cat ===")
+print(get_file_content("calculator", "/bin/cat"))
+print("\n")
 
-print("\nResult for '../' directory:")
-print(get_files_info("calculator", "../"))
+print("=== Test Case 4: calculator/pkg/does_not_exist.py ===")
+print(get_file_content("calculator", "pkg/does_not_exist.py"))
