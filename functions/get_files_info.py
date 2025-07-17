@@ -1,4 +1,5 @@
 import os
+import subprocess
 import config
 
 def get_files_info(working_directory, directory="."):
@@ -62,3 +63,36 @@ def write_file(working_directory, file_path, content):
         with open(file_path_abs, 'w') as f:
             f.write(content)
             return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+
+def run_python_file(working_directory, file_path, args=[]):
+    working_dir_path = os.path.abspath(working_directory)
+    # print(f"Debug: working_dir_path = {working_dir_path}")
+    file_path_abs = os.path.abspath(os.path.join(working_dir_path, file_path))
+    # print(f"Debug: file_path_abs = {file_path_abs}")
+    dir = os.path.dirname(file_path_abs)
+    # print(f"Debug: dir = {dir}")
+
+    if not file_path_abs.startswith(working_dir_path):
+        return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
+    if not os.path.isfile(file_path_abs):
+        return f'Error: File "{file_path}" not found.'
+    if not file_path.endswith(".py"):
+        return f'Error: "{file_path}" is not a Python file.'
+
+    output = ""
+
+    try:
+        command = [ "python3", file_path ] + args
+        processes = subprocess.run(command, capture_output=True, text=True, cwd=dir, timeout=30)
+    except Exception as e:
+        return f"Error: executing Python file: {e}"
+    else:
+        if not processes.stdout:
+            return "No output produced"
+
+        output += f'STDOUT: {processes.stdout}\nSTDERR: {processes.stderr}'
+        if processes.returncode != 0:
+            output += f'\nReturn code: {processes.returncode}'
+            return output
+        else:
+            return output
