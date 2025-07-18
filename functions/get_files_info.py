@@ -66,11 +66,8 @@ def write_file(working_directory, file_path, content):
 
 def run_python_file(working_directory, file_path, args=[]):
     working_dir_path = os.path.abspath(working_directory)
-    # print(f"Debug: working_dir_path = {working_dir_path}")
     file_path_abs = os.path.abspath(os.path.join(working_dir_path, file_path))
-    # print(f"Debug: file_path_abs = {file_path_abs}")
     dir = os.path.dirname(file_path_abs)
-    # print(f"Debug: dir = {dir}")
 
     if not file_path_abs.startswith(working_dir_path):
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
