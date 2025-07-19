@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+import config
 from functions import get_files_info
 import schemas
 
@@ -24,9 +25,9 @@ def call_function(function_call_part, verbose=False):
         func = functions[function_name]
 
     if verbose:
-        print(f"Calling function: {function_name}({function_args})")
+        print(f" - Calling function: {function_name}({function_args})")
     else:
-        print(f" - Calling function: {function_name}()")
+        print(f" - Calling function: {function_name}")
 
     function_args["working_directory"] = "./calculator"
     result = func(**function_args)
@@ -75,6 +76,7 @@ def main():
 
     All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
     """
+
     messages = [ types.Content(role="user", parts=[types.Part(text=user_prompt)]) ]
     available_functions = types.Tool(
         function_declarations=[
@@ -84,45 +86,59 @@ def main():
             schemas.schema_run_python_file,
         ]
     )
-    content = client.models.generate_content(
-        model="gemini-2.0-flash-001",
-        contents=messages,
-        config=types.GenerateContentConfig(
-            tools=[available_functions], system_instruction=system_prompt
-        ),
-    )
 
-    text = content.text
-    prompt_tokens = content.usage_metadata.prompt_token_count
-    response_tokens = content.usage_metadata.candidates_token_count
-    function_call_parts = content.function_calls
+    for _ in range(config.MAX_LLM_ITERATIONS):
+        content = client.models.generate_content(
+            model="gemini-2.0-flash-001",
+            contents=messages,
+            config=types.GenerateContentConfig(
+                tools=[available_functions], system_instruction=system_prompt
+            ),
+        )
+
+        function_call_parts = content.function_calls
+
+        candidates = content.candidates
+        for candidate in candidates:
+            messages.append(candidate.content)
+
+        if function_call_parts:
+            for func in function_call_parts:
+                try:
+                    if len(sys.argv) > 2:
+                        if sys.argv[2] == "--verbose":
+                            function_call_result = call_function(func, True)
+                            messages.append(function_call_result)
+                        else:
+                            print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
+                    elif len(sys.argv) == 2:
+                        function_call_result = call_function(func)
+                        messages.append(function_call_result)
+                    else:
+                        print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
+                except Exception as e:
+                    print(f"Error: {e}")
+                    sys.exit(1)
+
+        # Used to be if content.text
+        if not function_call_parts:
+            break
 
     if len(sys.argv) > 2:
         if sys.argv[2] == "--verbose":
-            if function_call_parts:
-                print(f"User prompt: : {user_prompt}\n")
-                print(f"Prompt tokens: {prompt_tokens}")
-                print(f"Response tokens: {response_tokens}")
-
-                for func in function_call_parts:
-                    try:
-                        function_call_result = call_function(func, True)
-                        response_dict = function_call_result.parts[0].function_response.response
-                        print(f"->\n{response_dict['result']}")
-                    except Exception:
-                        sys.exit(1)
-            else:
-                print(text)
+            print(f"User prompt: : {user_prompt}\n")
+            print(f"Prompt tokens: {content.usage_metadata.prompt_token_count}")
+            print(f"Response tokens: {content.usage_metadata.candidates_token_count}")
+            print("\nFinal response:")
+            print(content.text)
         else:
-            print("Error: invalid arguments passed")
+            print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
+    elif len(sys.argv) == 2:
+        print("\nFinal response:")
+        print(content.text)
     else:
-        if function_call_parts:
-            for func in function_call_parts:
-                function_call_result = call_function(func)
-                response_dict = function_call_result.parts[0].function_response.response
-                print(f"->\n{response_dict['result']}")
-        else:
-            print(text)
+        print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
+
 
 if __name__ == "__main__":
     main()
