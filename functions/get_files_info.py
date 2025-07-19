@@ -84,7 +84,7 @@ def run_python_file(working_directory, file_path, args=[]):
     except Exception as e:
         return f"Error: executing Python file: {e}"
     else:
-        if not processes.stdout:
+        if not processes.stdout and not processes.stderr:
             return "No output produced"
 
         output += f'STDOUT: {processes.stdout}\nSTDERR: {processes.stderr}'

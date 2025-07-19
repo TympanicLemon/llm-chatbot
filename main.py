@@ -121,7 +121,6 @@ def main():
                 function_call_result = call_function(func)
                 response_dict = function_call_result.parts[0].function_response.response
                 print(f"->\n{response_dict['result']}")
-            print(text)
         else:
             print(text)
 
