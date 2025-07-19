@@ -111,8 +111,7 @@ def main():
                 try:
                     if len(sys.argv) > 2:
                         if sys.argv[2] == "--verbose":
-                            function_call_result = call_function(func, True)
-                            messages.append(function_call_result)
+                            messages.append(call_function(func, True))
                         else:
                             print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
                     elif len(sys.argv) == 2:
