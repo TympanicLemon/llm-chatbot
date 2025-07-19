@@ -67,7 +67,11 @@ def main():
     system_prompt = """
     You are a helpful AI coding agent.
 
-    When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
+    When a user asks a question or makes a request, make a detailed plan of action on what steps need to be taken
+    to address said question or task. If the task involves changing code in some way, shape or form, then make sure
+    to first scan the appropriate files or directories, and use that context to drive your next steps or actions.
+
+    Here are some function calls you can use to help:
 
     - List files and directories
     - Read file contents
