@@ -53,7 +53,6 @@ def call_function(function_call_part, verbose=False):
             ],
         )
 
-
 def main():
     _ = load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -111,8 +110,7 @@ def main():
                 try:
                     if len(sys.argv) > 2:
                         if sys.argv[2] == "--verbose":
-                            function_call_result = call_function(func, True)
-                            messages.append(function_call_result)
+                            messages.append(call_function(func, True))
                         else:
                             print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
                     elif len(sys.argv) == 2:
@@ -124,7 +122,6 @@ def main():
                     print(f"Error: {e}")
                     sys.exit(1)
 
-        # Used to be if content.text
         if not function_call_parts:
             break
 
@@ -142,7 +139,6 @@ def main():
         print(content.text)
     else:
         print("Error: invalid argument[s] passed, usage: uv run main.py <prompt>")
-
 
 if __name__ == "__main__":
     main()
